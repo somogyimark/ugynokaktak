@@ -109,6 +109,32 @@ npm run data:import -- --dry-run   # csak riport (raw/import-report.md)
 npm run data:import                # public/data felülírása
 ```
 
+## Keresés
+
+- **MiniSearch Web Workerben** (`src/search/search.worker.ts`), így a gépelés nem akasztja a felületet.
+  A worker a katalógusrészeket maga tölti le és indexeli; a fő szál csak sorindexeket kap vissza
+  (átadható `Uint32Array`).
+- **Ékezetfüggetlen:** a `normalizeText` (`src/search/normalize.ts`) NFD-bontással eltávolítja az
+  ékezeteket, így „gábor” megtalálja a „Gabor”/„GABOR” alakot és fordítva.
+- **Elgépelést tűrő:** előtag-keresés + fuzzy (3 betűig 0, 6 betűig 1, fölötte 2 karakter eltérés).
+- **Szűrők:** irattípus, születési év tartomány, beszervezés éve, megye (a születési helyből, a
+  `src/data/geo.ts` helységnévtára alapján – ismeretlen helynél nem találgat).
+- **URL-állapot:** `/kereses?q=gábor&forras=karton6,hadattar&szulTol=1920&szulIg=1940&beszTol=1960&megye=BAR`
+  – minden találati lista linkelhető.
+- **Virtualizált lista** (`@tanstack/react-virtual`), billentyűzettel: a keresőmezőből ↓ a listára lép,
+  ↑/↓, Home/End, PageUp/PageDown, Enter.
+- A kérések összevonódnak: amíg egy keresés fut, csak a legújabb várakozó lekérdezés marad meg.
+
+Mért értékek 60 000 fiktív rekorddal (`npm run data:mock -- --count 60000`):
+
+| Mérés                                                    | Eredmény                 |
+| -------------------------------------------------------- | ------------------------ |
+| Indexépítés (Vitest, Node)                               | ~0,5 s                   |
+| Lekérdezés a motorban, gépelésszerű sorozat (Vitest)     | átlag ~9 ms, max ~58 ms  |
+| Billentyűleütéstől a kirajzolt találatig (headless Chromium) | átlag ~41 ms, max ~76 ms |
+
+A teljesítményteszt a `src/search/engine.test.ts`-ben fut minden `npm test`-nél.
+
 ## Design system
 
 A `/styleguide` oldal mutatja be a komponenseket: `Folder`, `PaperSheet`, `Stamp`, `Redaction`,
@@ -125,7 +151,7 @@ keresőoldalak `noindex`-esek, nincs analitika, nincs személyenkénti megosztó
 
 - [x] M1 – Váz és design system
 - [x] M2 – Séma + tesztadat
-- [ ] M3 – Keresés
+- [x] M3 – Keresés
 - [ ] M4 – Rekordnézetek
 - [ ] M5 – Nyitóoldal, statisztika, módszertan
 - [ ] M6 – Éles adat bekötése (csak jóváhagyás után!)

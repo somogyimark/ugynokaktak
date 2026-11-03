@@ -3,8 +3,8 @@
  * them in memory. Records are loaded one bucket at a time – the full dataset is never
  * fetched in one piece.
  */
-import { bucketFile, bucketOf, DATA_DIR, MANIFEST_FILE, STATS_FILE } from './dataset';
-import type { AgentRecord, Manifest, Stats } from './schema';
+import { bucketFile, bucketOf, catalogFile, DATA_DIR, MANIFEST_FILE, STATS_FILE } from './dataset';
+import type { AgentRecord, CatalogRow, Manifest, Stats } from './schema';
 
 const base = `${import.meta.env.BASE_URL}${DATA_DIR}/`;
 const cache = new Map<string, Promise<unknown>>();
@@ -30,4 +30,17 @@ export async function loadRecord(id: string): Promise<AgentRecord | null> {
   const manifest = await loadManifest();
   const bucket = await getJson<AgentRecord[]>(bucketFile(bucketOf(id, manifest.bucketCount)));
   return bucket.find((r) => r.id === id) ?? null;
+}
+
+/** Loads the full search catalog (all chunks) for result display on the search page. */
+export async function loadCatalog(): Promise<CatalogRow[]> {
+  const manifest = await loadManifest();
+  const chunks = await Promise.all(Array.from({ length: manifest.catalogChunks }, (_, i) => getJson<CatalogRow[]>(catalogFile(i))));
+  return chunks.flat();
+}
+
+/** Absolute URLs of the catalog chunks (for the search worker). */
+export async function catalogUrls(): Promise<string[]> {
+  const manifest = await loadManifest();
+  return Array.from({ length: manifest.catalogChunks }, (_, i) => new URL(base + catalogFile(i), location.href).href);
 }
