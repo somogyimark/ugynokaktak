@@ -20,7 +20,7 @@ export function Folder({ cover, children, tab, open = false, className = '' }: F
   return (
     <div className={`relative [perspective:1800px] ${className}`}>
       {tab && (
-        <div className="kraft absolute -top-6 left-6 h-8 w-40 rounded-t-md px-3 pt-1 font-stamp text-xs font-medium tracking-[0.2em] text-ink/80 uppercase shadow-[0_-1px_2px_rgba(0,0,0,0.15)] sm:w-52">
+        <div className="kraft absolute -top-6 left-6 h-8 min-w-40 rounded-t-md px-3 pt-1.5 font-stamp text-xs font-medium tracking-[0.2em] whitespace-nowrap text-ink uppercase shadow-[0_-1px_2px_rgba(0,0,0,0.15)] sm:min-w-52">
           {tab}
         </div>
       )}

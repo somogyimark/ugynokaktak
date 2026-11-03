@@ -53,11 +53,28 @@ describe('mock data', () => {
   it('builds a consistent chunked dataset', () => {
     const ds = buildDataset(records, { mode: 'mock', sourceDescription: 'test', generatedAt: 'x' });
     expect(ds.manifest.totalRecords).toBe(6000);
-    expect(ds.buckets.flat()).toHaveLength(6000);
-    ds.buckets.forEach((bucket, i) => bucket.forEach((r) => expect(bucketOf(r.id, ds.manifest.bucketCount)).toBe(i)));
+    expect(ds.buckets.flatMap((b) => b.records)).toHaveLength(6000);
+    ds.buckets.forEach((bucket, i) => bucket.records.forEach((r) => expect(bucketOf(r.id, ds.manifest.bucketCount)).toBe(i)));
     expect(ds.catalog.flat()).toHaveLength(6000);
     expect(Object.values(ds.stats.counts).reduce((a, b) => a + b, 0)).toBe(6000);
     expect(ds.stats.crossSourceNames).toBeGreaterThan(0);
+  });
+
+  it('marks same-name entries in other sources without merging them', () => {
+    const ds = buildDataset(records, { mode: 'mock', sourceDescription: 'test', generatedAt: 'x' });
+    const all = ds.buckets.flatMap((b) => b.records);
+    const hints = Object.assign({}, ...ds.buckets.map((b) => b.otherSources)) as Record<string, string[]>;
+    expect(Object.keys(hints).length).toBeGreaterThan(0);
+    for (const [id, sources] of Object.entries(hints)) {
+      const r = all.find((x) => x.id === id)!;
+      expect(sources).not.toContain(r.source);
+      for (const s of sources) expect(all.some((x) => x.source === s && x.nameNormalized === r.nameNormalized)).toBe(true);
+    }
+    // Every cross-source name produces hints on both sides.
+    for (const r of all) {
+      const elsewhere = all.some((x) => x.source !== r.source && x.nameNormalized === r.nameNormalized);
+      expect(!!hints[r.id], r.id).toBe(elsewhere);
+    }
   });
 
   it('rejects duplicate ids', () => {

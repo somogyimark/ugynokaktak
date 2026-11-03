@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { bucketFile, bucketOf, catalogFile, MANIFEST_FILE, STATS_FILE } from '../src/data/dataset';
 import { CatalogRowSchema, ManifestSchema, StatsSchema } from '../src/data/schema';
+import { isSourceType } from '../src/data/sources';
 import { validateRecords } from '../src/data/validate';
 import { PUBLIC_DATA_DIR } from './lib/write-dataset';
 
@@ -20,12 +21,15 @@ const ids = new Set<string>();
 const missing: Record<string, number> = {};
 let records = 0;
 for (let b = 0; b < manifest.bucketCount; b++) {
-  const data = await read(bucketFile(b));
-  if (!Array.isArray(data)) {
-    errors.push(`${bucketFile(b)}: nem tömb`);
+  const data = (await read(bucketFile(b))) as { records?: unknown; otherSources?: unknown };
+  if (!Array.isArray(data.records) || typeof data.otherSources !== 'object' || data.otherSources === null) {
+    errors.push(`${bucketFile(b)}: hibás csomagszerkezet`);
     continue;
   }
-  const { valid, issues } = validateRecords(data);
+  for (const [id, sources] of Object.entries(data.otherSources)) {
+    if (!Array.isArray(sources) || !sources.every(isSourceType)) errors.push(`${bucketFile(b)}: hibás otherSources (${id})`);
+  }
+  const { valid, issues } = validateRecords(data.records);
   for (const issue of issues) errors.push(`${bucketFile(b)}[${issue.index}] ${issue.id ?? ''}: ${issue.messages.join('; ')}`);
   for (const r of valid) {
     records++;

@@ -2,8 +2,9 @@ import { lazy, Suspense, type ReactNode } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router';
 import { Layout } from './components/Layout';
 import { Loading } from './components/Loading';
+// The landing page is part of the main bundle: no extra round trip before first paint.
+import Home from './views/Home';
 
-const Home = lazy(() => import('./views/Home'));
 const Search = lazy(() => import('./views/Search'));
 const Record = lazy(() => import('./views/Record'));
 const Stats = lazy(() => import('./views/Stats'));
@@ -23,7 +24,7 @@ export const router = createBrowserRouter([
   {
     element: <Layout />,
     children: [
-      { index: true, element: page(<Home />) },
+      { index: true, element: <Home /> },
       { path: 'kereses', element: page(<Search />) },
       { path: 'akta/:id', element: page(<Record />) },
       { path: 'kimutatas', element: page(<Stats />) },

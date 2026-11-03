@@ -54,8 +54,6 @@ export class SearchEngine {
   private readonly sourceIdx: Uint8Array;
   private readonly birth: Int16Array;
   private readonly recruit: Int16Array;
-  private readonly byName = new Map<string, number[]>();
-  private readonly idToIndex = new Map<string, number>();
 
   constructor(rows: readonly CatalogRow[]) {
     this.rows = rows;
@@ -66,16 +64,11 @@ export class SearchEngine {
     const normNames: string[] = new Array(n);
 
     rows.forEach((row, i) => {
-      const [id, source, name, , birthYear, , , recruitYear] = row;
+      const [, source, name, , birthYear, , , recruitYear] = row;
       this.sourceIdx[i] = SOURCE_TYPES.indexOf(source);
       this.birth[i] = birthYear ?? NONE;
       this.recruit[i] = recruitYear ?? NONE;
-      const norm = normalizeText(name);
-      normNames[i] = norm;
-      const list = this.byName.get(norm);
-      if (list) list.push(i);
-      else this.byName.set(norm, [i]);
-      this.idToIndex.set(id, i);
+      normNames[i] = normalizeText(name);
     });
 
     const order = Array.from({ length: n }, (_, i) => i);
@@ -104,14 +97,6 @@ export class SearchEngine {
       for (const i of this.alphabetical) if (accept(i)) out.push(i);
     }
     return { indices: Uint32Array.from(out), total: out.length };
-  }
-
-  /** Other records with exactly the same normalised name (any source). Not proof of identity. */
-  sameName(id: string): { id: string; source: SourceType }[] {
-    const i = this.idToIndex.get(id);
-    if (i === undefined) return [];
-    const norm = normalizeText(this.rows[i]![2]);
-    return (this.byName.get(norm) ?? []).filter((j) => j !== i).map((j) => ({ id: this.rows[j]![0], source: this.rows[j]![1] }));
   }
 
   private filter(q: SearchQuery): (i: number) => boolean {

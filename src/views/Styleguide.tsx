@@ -12,7 +12,7 @@ import { RegistryNumber } from '../components/RegistryNumber';
 const COLORS = [
   { name: 'Papír', token: 'paper', hex: '#efe6d2' },
   { name: 'Sötét papír', token: 'paper-dark', hex: '#e2d5b8' },
-  { name: 'Karton', token: 'kraft', hex: '#a07a4a' },
+  { name: 'Karton', token: 'kraft', hex: '#ad875a' },
   { name: 'Tinta', token: 'ink', hex: '#1d1b19' },
   { name: 'Pecsét', token: 'stamp', hex: '#b3261e' },
   { name: 'Golyóstoll', token: 'pen', hex: '#1f3fa8' },

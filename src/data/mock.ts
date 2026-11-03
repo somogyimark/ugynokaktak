@@ -82,7 +82,9 @@ interface Person {
 function makePerson(rng: Rng): Person {
   const female = chance(rng, 0.27);
   const birthYear = int(rng, 1900, 1966);
-  const recruitmentYear = Math.min(1989, int(rng, Math.max(1957, birthYear + 18), Math.max(1957, birthYear + 18) + 25));
+  // Recruited as an adult, between 1957 and 1989 (birth years are capped so this range is never empty).
+  const earliest = Math.max(1957, birthYear + 18);
+  const recruitmentYear = int(rng, earliest, Math.min(1989, earliest + 25));
   const unit = chance(rng, 0.55)
     ? `BM ${pick(rng, DIRECTORATES)}-${int(rng, 1, 7)}. osztály`
     : `${pick(rng, COUNTY_UNITS)} megyei RFK III/III. osztály`;

@@ -47,7 +47,8 @@ export function Layout() {
           </nav>
         </div>
       </header>
-      <main id="tartalom" className="flex-1" tabIndex={-1}>
+      {/* min-h keeps the footer below the fold while lazy pages and data load (no layout shift). */}
+      <main id="tartalom" className="min-h-[100dvh] flex-1" tabIndex={-1}>
         <Outlet />
       </main>
       <footer className="mt-12 border-t border-[var(--desk-line)] text-sm text-[var(--desk-muted)]">

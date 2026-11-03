@@ -52,7 +52,8 @@ scripts/          adatgenerálás és import
 src/
   adapters/       forrásformátumonkénti átalakítók
   components/     design system komponensek
-  data/           zod sémák, adatbetöltés
+  data/           zod sémák (schema.ts), zod-mentes modellkonstansok (model.ts),
+                  adatbetöltés (client.ts), csomagolás (dataset.ts), tesztadat (mock.ts)
   search/         keresőworker, normalizálás
   views/          oldalak
 public/data/      generált, darabolt JSON (gitignore, a scriptek állítják elő)
@@ -73,7 +74,7 @@ importnál/validálásnál fut, a kliensbe nem kerül be.
 | --------------------- | ------------------------------------------------------------------------ |
 | `manifest.json`       | mód (`mock`/`live`), dátum, rekordszámok, csomagok száma                 |
 | `stats.json`          | csak aggregált számok (típusonként, évenként, megyénként, kitöltöttség) |
-| `records-NNN.json`    | teljes rekordok, `hash(id) % bucketCount` szerint ~400-as csomagokban     |
+| `records-NNN.json`    | `{ records, otherSources }`: teljes rekordok `hash(id) % bucketCount` szerint ~400-as csomagokban, és az azonos nevű, más forrásbeli bejegyzések jelzése |
 | `catalog-NNN.json`    | tömör keresőkatalógus (tuple-ök) a keresőworkernek                       |
 
 A rekordoldal csak azt az egy csomagot tölti le, amelyikben a rekord van; az adatbázis egyben nem
@@ -162,6 +163,55 @@ Módszertan kapcsolja ki (`indexable`). Ezt teszt is ellenőrzi.
 > A helyesbítési kapcsolat címe (`VITE_CONTACT_EMAIL`) jelenleg helyőrző (`helyesbites@example.org`);
 > élesítés előtt valódi, figyelt címre kell cserélni.
 
+## Nyitóoldal, Kimutatás, Módszertan
+
+- **Nyitóoldal („Az akta”)** – zárt kartondosszié „SZIGORÚAN TITKOS” pecséttel és iktatószámmal; kattintásra,
+  gombbal vagy görgetésre kinyílik. Alatta írógépes kereső és számláló-animációs összesítő (csökkentett
+  mozgásnál azonnal a végérték).
+- **Kimutatás** – „belső jelentés” formában, csak aggregált adatokból (`stats.json`): rekordszám
+  irattípusonként, beszervezések évenként (irattípusonkénti kis többszörösök, közös skálán), sematikus
+  megye-csempetérkép egyárnyalatú skálával, születési évtizedek, mezőkitöltöttség. Minden diagramhoz
+  táblázatos nézet és hover-súgó tartozik.
+- **Módszertan és jogi tudnivalók** – adatforrás és frissítés dátuma (a manifestből), irattípusok, korlátok,
+  a keresés működése, adatvédelmi elvek, eltávolítási/helyesbítési kérés.
+
+### Lighthouse (mobil, 6000 rekord, `vite preview`)
+
+| Oldal              | Performance | Accessibility | Best practices |
+| ------------------ | ----------- | ------------- | -------------- |
+| `/`                | 92          | 100           | 100            |
+| `/kimutatas`       | 91          | 100           | 100            |
+| `/modszertan`      | 94          | 100           | 100            |
+| `/kereses?q=gabor` | 85          | 100           | 100            |
+| `/akta/…` (karton) | 86          | 100           | 100            |
+| `/akta/…` (napló)  | 90          | 100           | 100            |
+
+A nyitóoldal a fő csomagban van (nincs plusz hálózati kör), a többi oldal lustán töltődik. A zod
+kizárólag a scriptekben és tesztekben fut, a kliensbe nem kerül be. Az „azonos nevű bejegyzés más
+forrásban” jelzést a build előre kiszámolja a rekordcsomagokba, így a rekordoldalnak nem kell a teljes
+keresőkatalógust letöltenie.
+
+## Döntések és értelmezések
+
+- **Megye:** a normalizált modellben nincs megye mező, ezért a megyét a születési helyből vezetjük le
+  (`src/data/geo.ts`, mai megyehatárok); ismeretlen helynél nem találgatunk. Élesítéskor a helységnévtárat
+  bővíteni kell.
+- **Megyetérkép:** sematikus csempetérkép (hozzávetőleges elhelyezkedés), nem pontos határvonalas térkép.
+- **B-napló szomszédos sorai:** elmosott helykitöltők, nem valódi bejegyzések – más személyek adatai
+  így semmilyen formában (DOM, vágólap, képernyőolvasó) nem szivárognak ki.
+- **Tesztadat:** a vezetéknevek kitaláltak; a keresztnevek, települések és szervezeti megnevezések
+  általánosak, hogy a felület valósághű legyen. A tevékenység-szövegek „(fiktív)” jelölést kapnak.
+- **„Egyben nem letölthető”:** a kliensoldali kereséshez a tömör katalógus részekben töltődik le, a
+  teljes rekordok csak csomagonként; letöltés gomb vagy egyfájlos export nincs. 60 000 rekordnál a
+  katalógus kb. 6 MB tömörítetlenül (gzip/brotli után kb. 1 MB), ezt csak a keresőoldal tölti le.
+
+## Nyitott teendők
+
+- `VITE_CONTACT_EMAIL`: valódi, figyelt helyesbítési cím (most helyőrző).
+- M6: az éles forrás vizsgálata, `scripts/import.config.ts` kitöltése, import riport, `VITE_DATA_MODE=live`,
+  valamint a „továbbítás a hivatalos keresőbe” mód, ha csak keresőfelület lesz (SPEC 11.3).
+- M7: deploy, egyedi 404 a tárhelyen, `robots.txt` (a Lighthouse SEO-pontszáma emiatt most 91).
+
 ## Design system
 
 A `/styleguide` oldal mutatja be a komponenseket: `Folder`, `PaperSheet`, `Stamp`, `Redaction`,
@@ -180,6 +230,6 @@ keresőoldalak `noindex`-esek, nincs analitika, nincs személyenkénti megosztó
 - [x] M2 – Séma + tesztadat
 - [x] M3 – Keresés
 - [x] M4 – Rekordnézetek
-- [ ] M5 – Nyitóoldal, statisztika, módszertan
+- [x] M5 – Nyitóoldal, statisztika, módszertan
 - [ ] M6 – Éles adat bekötése (csak jóváhagyás után!)
 - [ ] M7 – Deploy

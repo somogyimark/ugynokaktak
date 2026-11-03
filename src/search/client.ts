@@ -3,7 +3,6 @@
  * only the newest pending query is kept, so fast typing never builds up a backlog.
  */
 import { catalogUrls } from '../data/client';
-import type { SourceType } from '../data/sources';
 import type { SearchQuery } from './engine';
 import type { WorkerRequest, WorkerResponse } from './protocol';
 
@@ -20,7 +19,6 @@ class SearchClient {
   private nextId = 1;
   private inflight: (Pending & { reqId: number }) | null = null;
   private pending: Pending | null = null;
-  private sameNameWaiters = new Map<number, (m: { id: string; source: SourceType }[]) => void>();
   readonly ready: Promise<{ total: number; buildMs: number }>;
 
   constructor() {
@@ -52,10 +50,6 @@ class SearchClient {
             this.flush();
           }
           break;
-        case 'sameName':
-          this.sameNameWaiters.get(msg.reqId)?.(msg.matches);
-          this.sameNameWaiters.delete(msg.reqId);
-          break;
       }
     };
     this.worker.onerror = (e) => rejectReady(new Error(e.message || 'A keresőmotor nem indult el'));
@@ -71,14 +65,6 @@ class SearchClient {
       this.pending?.resolve(null);
       this.pending = { query, resolve, reject };
       this.flush();
-    });
-  }
-
-  sameName(id: string): Promise<{ id: string; source: SourceType }[]> {
-    const reqId = this.nextId++;
-    return new Promise((resolve) => {
-      this.sameNameWaiters.set(reqId, resolve);
-      this.post({ type: 'sameName', reqId, id });
     });
   }
 

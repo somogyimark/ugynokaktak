@@ -16,8 +16,6 @@ function handle(msg: WorkerRequest) {
     const t0 = performance.now();
     const { indices, total } = engine.search(msg.query);
     post({ type: 'result', reqId: msg.reqId, indices, total, tookMs: performance.now() - t0 }, [indices.buffer]);
-  } else if (msg.type === 'sameName') {
-    post({ type: 'sameName', reqId: msg.reqId, matches: engine.sameName(msg.id) });
   }
 }
 

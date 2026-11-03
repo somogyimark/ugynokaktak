@@ -3,18 +3,15 @@ import { PageMeta } from '../components/PageMeta';
 import { Loading } from '../components/Loading';
 import { loadRecord } from '../data/client';
 import { useAsync } from '../hooks/useAsync';
-import { getSearchClient } from '../search/client';
 import { SOURCES } from '../data/sources';
 import { RecordDocument } from './record/RecordDocument';
 import type { AgentRecord } from '../data/schema';
+import type { SourceType } from '../data/sources';
 
 /** "Same name in another source" hint. Name equality is not proof of identity, so no merging. */
-function SameNameNotice({ record }: { record: AgentRecord }) {
-  const matches = useAsync(() => getSearchClient().sameName(record.id), [record.id]);
-  if (matches.status !== 'ready') return null;
-  const others = matches.value.filter((m) => m.source !== record.source);
-  if (!others.length) return null;
-  const sources = [...new Set(others.map((m) => SOURCES[m.source].label))].join(', ');
+function SameNameNotice({ record, otherSources }: { record: AgentRecord; otherSources: SourceType[] }) {
+  if (!otherSources.length) return null;
+  const sources = otherSources.map((s) => SOURCES[s].label).join(', ');
   return (
     <p className="border border-dashed border-[var(--desk-line)] p-3 text-sm" data-testid="same-name">
       <strong>Azonos nevű bejegyzés más forrásban is</strong> ({sources}).{' '}
@@ -35,7 +32,7 @@ export default function Record() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
       {/* Every record page is noindex (SPEC §9); no per-person social cards either. */}
-      <PageMeta title={state.status === 'ready' && state.value ? `Akta – ${SOURCES[state.value.source].label}` : 'Akta'} />
+      <PageMeta title={state.status === 'ready' && state.value ? `Akta – ${SOURCES[state.value.record.source].label}` : 'Akta'} />
       <nav aria-label="Vissza" className="mb-6">
         <Link to={`/kereses${backSearch ?? ''}`} className="font-stamp text-sm tracking-[0.15em] uppercase underline-offset-4 hover:underline">
           ← {backSearch ? 'Vissza a találatokhoz' : 'Katalógus'}
@@ -51,8 +48,8 @@ export default function Record() {
       )}
       {state.status === 'ready' && state.value && (
         <div className="space-y-6">
-          <SameNameNotice record={state.value} />
-          <RecordDocument record={state.value} />
+          <SameNameNotice record={state.value.record} otherSources={state.value.otherSources} />
+          <RecordDocument record={state.value.record} />
         </div>
       )}
     </div>

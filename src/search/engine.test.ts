@@ -54,12 +54,6 @@ describe('SearchEngine (small, handmade catalog)', () => {
   it('lists everything alphabetically without a query', () => {
     expect(ids({})).toEqual(['t-5', 't-4', 't-1', 't-2', 't-3']);
   });
-
-  it('reports same-name records in other sources', () => {
-    expect(engine.sameName('t-1')).toEqual([{ id: 't-2', source: 'hadattar' }]);
-    expect(engine.sameName('t-4')).toEqual([]);
-    expect(engine.sameName('missing')).toEqual([]);
-  });
 });
 
 describe('SearchEngine performance (60 000 records)', () => {

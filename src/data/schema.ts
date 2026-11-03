@@ -8,7 +8,9 @@ import { SOURCE_TYPES } from './sources';
 
 export { SOURCE_TYPES, type SourceType } from './sources';
 
-export const SCHEMA_VERSION = 1;
+import { SCHEMA_VERSION } from './model';
+
+export { SCHEMA_VERSION, OPTIONAL_FIELDS, type OptionalField } from './model';
 
 const optionalText = z.string().trim().min(1).optional();
 
@@ -47,21 +49,6 @@ export const AgentRecordSchema = z
 
 export type AgentRecord = z.infer<typeof AgentRecordSchema>;
 
-/** Optional, displayable fields of a record, in display order. */
-export const OPTIONAL_FIELDS = [
-  'coverName',
-  'birthDate',
-  'birthPlace',
-  'motherName',
-  'recruitmentDate',
-  'recruitingUnit',
-  'category',
-  'activity',
-  'registryNumber',
-  'officialUrl',
-] as const satisfies readonly (keyof AgentRecord)[];
-
-export type OptionalField = (typeof OPTIONAL_FIELDS)[number];
 
 /**
  * Compact search-catalog row, stored as a tuple to keep the search payload small:

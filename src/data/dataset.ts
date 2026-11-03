@@ -5,7 +5,8 @@
 import { fnv1a } from '../lib/random';
 import { extractYear, normalizeText } from '../search/normalize';
 import { countyOfPlace } from './geo';
-import { SCHEMA_VERSION, type AgentRecord, type CatalogRow, type Manifest, type Stats } from './schema';
+import type { AgentRecord, CatalogRow, Manifest, Stats } from './schema';
+import { SCHEMA_VERSION } from './model';
 import { SOURCE_TYPES, SOURCES, type SourceType } from './sources';
 
 /** Target number of records per detail bucket file. */
@@ -97,10 +98,20 @@ export function computeStats(records: readonly AgentRecord[], generatedAt: strin
   };
 }
 
+/** One `records-NNN.json` file. */
+export interface RecordBucket {
+  records: AgentRecord[];
+  /**
+   * id → other source types that contain a record with exactly the same normalised name.
+   * Only an "also appears elsewhere" hint – never proof of identity, never merged.
+   */
+  otherSources: Record<string, SourceType[]>;
+}
+
 export interface Dataset {
   manifest: Manifest;
   stats: Stats;
-  buckets: AgentRecord[][];
+  buckets: RecordBucket[];
   catalog: CatalogRow[][];
 }
 
@@ -119,8 +130,19 @@ export function buildDataset(records: readonly AgentRecord[], opts: BuildOptions
   }
   const generatedAt = opts.generatedAt ?? new Date().toISOString();
   const bucketCount = Math.max(1, Math.ceil(records.length / RECORDS_PER_BUCKET));
-  const buckets: AgentRecord[][] = Array.from({ length: bucketCount }, () => []);
-  for (const r of records) buckets[bucketOf(r.id, bucketCount)]!.push(r);
+  const sourcesByName = new Map<string, Set<SourceType>>();
+  for (const r of records) {
+    let set = sourcesByName.get(r.nameNormalized);
+    if (!set) sourcesByName.set(r.nameNormalized, (set = new Set()));
+    set.add(r.source);
+  }
+  const buckets: RecordBucket[] = Array.from({ length: bucketCount }, () => ({ records: [], otherSources: {} }));
+  for (const r of records) {
+    const bucket = buckets[bucketOf(r.id, bucketCount)]!;
+    bucket.records.push(r);
+    const others = SOURCE_TYPES.filter((s) => s !== r.source && sourcesByName.get(r.nameNormalized)!.has(s));
+    if (others.length) bucket.otherSources[r.id] = others;
+  }
 
   const rows = records.map(toCatalogRow);
   const catalog: CatalogRow[][] = [];
