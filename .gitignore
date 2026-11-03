@@ -1,0 +1,13 @@
+node_modules/
+dist/
+coverage/
+*.log
+.env.local
+.env.*.local
+
+# Real source data is copied here by hand and must never be committed.
+/raw/*
+!/raw/.gitkeep
+
+# Generated data (mock or imported); rebuilt by scripts.
+/public/data/
