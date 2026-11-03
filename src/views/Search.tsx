@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 import { PageMeta } from '../components/PageMeta';
 import { SearchBox } from '../components/SearchBox';
 import { Loading } from '../components/Loading';
@@ -23,6 +23,12 @@ export default function Search() {
   const catalog = useAsync(loadCatalog, []);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<ResultListHandle>(null);
+  const location = useLocation();
+
+  // Arriving via the "/" shortcut: start typing straight away.
+  useEffect(() => {
+    if ((location.state as { focusSearch?: boolean } | null)?.focusSearch) inputRef.current?.focus();
+  }, [location.state]);
 
   // Keep the input in sync when the URL changes from outside (back/forward, links).
   useEffect(() => {
@@ -60,9 +66,11 @@ export default function Search() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <PageMeta title={query.q ? `Keresés: ${query.q}` : 'Katalógus'} />
-      <header className="mb-6">
-        <h1 className="font-stamp text-3xl font-bold tracking-[0.15em] uppercase">Cédulakatalógus</h1>
-        <p className="mt-1 max-w-prose text-[var(--desk-muted)]">
+      <header className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-3">
+        <span className="brass-holder -rotate-1">
+          <h1 className="px-4 py-1.5 font-stamp text-2xl font-bold tracking-[0.15em] uppercase sm:text-3xl">Cédulakatalógus</h1>
+        </span>
+        <p className="max-w-prose text-[var(--desk-muted)]">
           Keresés névre és fedőnévre, ékezettől függetlenül; az apró elgépeléseket is megtalálja.
         </p>
       </header>
@@ -82,6 +90,12 @@ export default function Search() {
           }
         }}
       />
+
+      {/* Above the results, so it never moves while the list loads. */}
+      <p className="mt-2 hidden text-xs text-[var(--desk-muted)] sm:block">
+        Billentyűzet: <kbd className="font-terminal">/</kbd> a keresőmezőbe ugrik, onnan ↓ a találatokra lép; ↑/↓, Home/End,
+        PageUp/PageDown lapoz, Enter megnyitja az aktát.
+      </p>
 
       <div className="mt-4 grid gap-6 lg:grid-cols-[17rem_1fr]">
         <div>
@@ -119,9 +133,6 @@ export default function Search() {
           {catalog.status === 'ready' && result && result.total > 0 && (
             <ResultList ref={listRef} rows={catalog.value} indices={result.indices} backSearch={`?${paramKey}`} onExitTop={() => inputRef.current?.focus()} />
           )}
-          <p className="mt-6 text-xs text-[var(--desk-muted)]">
-            Billentyűzet: a keresőmezőből ↓ a találatokra lép, ↑/↓, Home/End, PageUp/PageDown lapoz, Enter megnyitja az aktát.
-          </p>
         </section>
       </div>
     </div>

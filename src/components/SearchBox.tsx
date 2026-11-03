@@ -8,12 +8,13 @@ interface SearchBoxProps {
   size?: 'md' | 'lg';
   autoFocus?: boolean;
   label?: string;
+  placeholder?: string;
   describedBy?: string;
 }
 
 /** Typewriter-style search field: a typed line on paper with a label like a printed form. */
 export const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(function SearchBox(
-  { value, onChange, onSubmit, onKeyDown, size = 'md', autoFocus, label = 'Név vagy fedőnév', describedBy },
+  { value, onChange, onSubmit, onKeyDown, size = 'md', autoFocus, label = 'Név vagy fedőnév', placeholder = 'pl. Próbaházi Gábor, Fecske', describedBy },
   ref,
 ) {
   return (
@@ -42,7 +43,7 @@ export const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(function S
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={onKeyDown}
           aria-describedby={describedBy}
-          placeholder="pl. Próbaházi Gábor, Fecske"
+          placeholder={placeholder}
           className={`ink-typed w-full min-w-0 border-0 border-b-2 border-dashed border-ink/40 bg-transparent px-1 py-1 placeholder:text-ink-faded focus:border-solid focus:border-pen focus:outline-none ${
             size === 'lg' ? 'text-2xl sm:text-3xl' : 'text-xl'
           }`}

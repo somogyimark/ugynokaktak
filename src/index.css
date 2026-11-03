@@ -26,6 +26,9 @@
   --font-typewriter: 'Special Elite', 'Courier Prime', 'Courier New', Courier, ui-monospace, monospace;
   --font-mono-body: 'Courier Prime', 'Courier New', Courier, ui-monospace, monospace;
   --font-stamp: 'Oswald', 'Arial Narrow', 'Roboto Condensed', 'Helvetica Neue', Arial, sans-serif;
+  /* Stencil lettering of archive boxes and folder covers; latin subset only, so use it for
+     the wordmark, not for running text with ő/ű. */
+  --font-stencil: 'Stardos Stencil', 'Oswald', 'Arial Narrow', Arial, sans-serif;
   --font-terminal: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
 
   --animate-blink: blink 1.05s steps(1) infinite;
@@ -34,6 +37,170 @@
 @keyframes blink {
   50% {
     opacity: 0;
+  }
+}
+
+/* Rubber stamp hitting the paper: drops in large, overshoots, settles. */
+@keyframes stamp-slam {
+  0% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.94);
+  }
+  80% {
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* The surface jolts when the stamp lands. */
+@keyframes thud {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  30% {
+    transform: translate(1px, 2px);
+  }
+  60% {
+    transform: translate(-1px, -1px);
+  }
+}
+
+/* CRT power-on: a bright line opens into the full picture. */
+@keyframes crt-on {
+  0% {
+    transform: scale(1, 0.004);
+    filter: brightness(4);
+    opacity: 0.2;
+  }
+  35% {
+    transform: scale(1, 0.004);
+    filter: brightness(4);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1, 1);
+    filter: brightness(1.6);
+  }
+  100% {
+    transform: scale(1, 1);
+    filter: brightness(1);
+  }
+}
+
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 0.94;
+  }
+  50% {
+    opacity: 0.985;
+  }
+}
+
+/* Highlighter pen drawn across the selected ledger line. */
+@keyframes highlight-sweep {
+  from {
+    background-size: 0% 100%;
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+/* Index card pulled out of the drawer. */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) rotate(-0.6deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes lamp-on {
+  0%,
+  10%,
+  24% {
+    opacity: 0;
+  }
+  8%,
+  20%,
+  34% {
+    opacity: 0.7;
+  }
+  40%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes grain {
+  0% {
+    background-position: 0 0;
+  }
+  17% {
+    background-position: -37px 23px;
+  }
+  34% {
+    background-position: 51px -64px;
+  }
+  51% {
+    background-position: -78px -12px;
+  }
+  68% {
+    background-position: 29px 70px;
+  }
+  85% {
+    background-position: -15px 45px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.99);
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) rotate(0.4deg);
   }
 }
 
@@ -83,12 +250,29 @@
     }
   }
 
+  /* Route changes (View Transitions API, progressive enhancement): the page is a sheet slid
+     onto the desk. Header and demo ribbon have their own names, so they stay put. */
+  ::view-transition-old(root) {
+    animation: vt-out 0.22s ease-in both;
+  }
+  ::view-transition-new(root) {
+    animation: vt-in 0.38s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
   @media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+      animation: none !important;
+    }
+
     *,
     *::before,
     *::after {
       animation-duration: 0.001ms !important;
+      animation-delay: 0s !important;
       animation-iteration-count: 1 !important;
+      transition-delay: 0s !important;
       transition-duration: 0.001ms !important;
       scroll-behavior: auto !important;
     }
@@ -165,6 +349,15 @@
 
   .ink-faint {
     opacity: 0.78;
+  }
+
+  /* Stencilled paint on cardboard: slightly eroded edges and a hint of overspray. */
+  .stencil-paint {
+    font-family: var(--font-stencil);
+    color: rgb(28 20 12 / 0.88);
+    mix-blend-mode: multiply;
+    text-shadow: 0 0 2px rgb(28 20 12 / 0.35);
+    filter: url(#worn-edge);
   }
 
   .stamp-ink {
@@ -248,6 +441,170 @@
     inset: 0;
     background: repeating-linear-gradient(180deg, rgb(0 0 0 / 0.22) 0 1px, transparent 1px 3px);
     border-radius: inherit;
+  }
+
+  /* Reading-room lighting (see <DeskLamp />). Behind the content: a warm pool of light on the
+     desk, static (centre top) or following a fine pointer via --lx/--ly. */
+  .desk-lamp {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(16rem circle at var(--lx, 50%) var(--ly, 16%), rgb(255 226 170 / calc(var(--lamp) * 1.5)), transparent 70%),
+      radial-gradient(50rem circle at var(--lx, 50%) var(--ly, 16%), rgb(255 186 100 / var(--lamp)), transparent 66%),
+      radial-gradient(ellipse at 50% 35%, transparent 40%, rgb(0 0 0 / var(--vignette))),
+      /* wood grain of the desk top: SVG noise stretched along the grain, no image file */
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='600'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.002 .045' numOctaves='4' seed='9' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .3 0 0 0 0 .19 0 0 0 0 .09 0 0 0 .6 -.22'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E");
+    --lamp: 0.3;
+    --vignette: 0.22;
+  }
+
+  /* Above the content: the room outside the beam falls into shadow. Capped darkness keeps text
+     contrast at WCAG AA even in the darkest corner; the sticky demo ribbon (z-40) stays lit. */
+  .lamp-shade {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    mix-blend-mode: multiply;
+    background: radial-gradient(34rem circle at var(--lx, 50%) var(--ly, 30%), transparent 30%, rgb(20 12 4 / var(--shade)) 100%);
+    --shade: 0.22;
+  }
+
+  /* ...and the paper right under the lamp warms up. */
+  .lamp-glow {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    mix-blend-mode: soft-light;
+    background: radial-gradient(20rem circle at var(--lx, 50%) var(--ly, 30%), rgb(255 200 120 / 0.55), transparent 70%);
+  }
+
+  .lamp-dust {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 31;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .desk-lamp {
+      --lamp: 0.2;
+      --vignette: 0.7;
+    }
+    .desk-lamp-live {
+      --lamp: 0.26;
+    }
+    .lamp-shade {
+      --shade: 0.4;
+    }
+  }
+
+  /* Pull-chain lamp switching on, once per visit. */
+  .lamp-intro {
+    animation: lamp-on 1.3s steps(1) both;
+  }
+
+  /* Film grain: the noise texture jumps around in steps (~7 fps). Only background-position moves,
+     never the element itself, so it can't register as a layout shift. Static with reduced motion. */
+  .film-grain {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+    animation: grain 0.9s steps(1) infinite;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .film-grain {
+      opacity: 0.07;
+    }
+  }
+
+  .stamp-slam {
+    animation: stamp-slam 0.55s cubic-bezier(0.3, 0.1, 0.4, 1.2) backwards;
+  }
+
+  .thud {
+    animation: thud 0.18s ease-out backwards;
+  }
+
+  .crt-on {
+    animation:
+      crt-on 0.9s ease-out both,
+      crt-flicker 4s 1s ease-in-out infinite;
+  }
+
+  .highlight-sweep {
+    background-image: linear-gradient(transparent 6%, rgb(255 226 92 / 0.55) 6%, rgb(255 226 92 / 0.55) 94%, transparent 94%);
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    animation: highlight-sweep 0.7s 0.25s cubic-bezier(0.6, 0, 0.3, 1) both;
+  }
+
+  .card-in {
+    animation: card-in 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .grow-x {
+    transform-origin: left;
+    animation: grow-x 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .reel {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: spin 1.6s linear infinite;
+  }
+
+  .reel-stopped {
+    animation-play-state: paused;
+  }
+
+  /* Pointer-driven 3D tilt with a moving glare (see <Tilt />). */
+  .tilt {
+    transform: perspective(1100px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform 0.25s ease-out;
+    will-change: transform;
+  }
+
+  .tilt-glare {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: inherit;
+    background: radial-gradient(circle at var(--gx, 50%) var(--gy, 0%), rgb(255 250 230 / 0.35), transparent 55%);
+    mix-blend-mode: soft-light;
+    opacity: var(--glare, 0);
+    transition: opacity 0.3s;
+  }
+
+  /* Brass label holder on a card catalogue drawer. */
+  .brass-holder {
+    display: inline-block;
+    padding: 0.35rem;
+    border-radius: 4px;
+    background: linear-gradient(160deg, #e9cf8a, #b38a3e 40%, #f2dc9c 55%, #8d6a2a);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.5),
+      inset 0 -1px 0 rgb(0 0 0 / 0.35),
+      0 3px 8px -2px rgb(0 0 0 / 0.45);
+  }
+
+  .brass-holder > * {
+    display: block;
+    background: var(--color-paper-light);
+    color: var(--color-ink);
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.35);
+  }
+
+  .scroll-hint {
+    animation: nudge 1.6s ease-in-out infinite;
   }
 
   .sr-only-focusable:not(:focus):not(:focus-within) {

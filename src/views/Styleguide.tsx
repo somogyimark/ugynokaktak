@@ -8,6 +8,8 @@ import { TypewriterText } from '../components/TypewriterText';
 import { PaperClip } from '../components/PaperClip';
 import { TapeLabel } from '../components/TapeLabel';
 import { RegistryNumber } from '../components/RegistryNumber';
+import { Odometer } from '../components/Odometer';
+import { Tilt } from '../components/Tilt';
 
 const COLORS = [
   { name: 'Papír', token: 'paper', hex: '#efe6d2' },
@@ -41,6 +43,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export default function Styleguide() {
   const [open, setOpen] = useState(false);
   const [typeKey, setTypeKey] = useState(0);
+  const [slamKey, setSlamKey] = useState(0);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
@@ -145,6 +148,36 @@ export default function Styleguide() {
             Fiktív
           </Stamp>
         </PaperSheet>
+      </Section>
+
+      <Section title="Stamp slam, Tilt, Odometer – mozgás">
+        <div className="grid gap-6 sm:grid-cols-3">
+          <PaperSheet className="grid place-items-center p-6">
+            {/* key forces a remount, so the slam replays on every press */}
+            <Stamp key={slamKey} slam={0} size="lg" rotate={-8}>
+              Iktatva
+            </Stamp>
+            <button
+              type="button"
+              onClick={() => setSlamKey((k) => k + 1)}
+              className="mt-4 rounded-sm bg-ink px-3 py-1.5 font-stamp text-xs tracking-widest text-paper uppercase"
+            >
+              Újra pecsétel
+            </button>
+          </PaperSheet>
+          <Tilt>
+            <PaperSheet variant="card" className="h-full p-6">
+              <h3 className="font-stamp tracking-widest uppercase">Tilt</h3>
+              <p className="mt-2 text-sm">Egérrel mozgatva megbillen, a lámpafény végigcsúszik rajta.</p>
+            </PaperSheet>
+          </Tilt>
+          <PaperSheet className="p-6">
+            <h3 className="font-stamp tracking-widest uppercase">Odometer</h3>
+            <p className="mt-2 font-typewriter text-3xl">
+              <Odometer value={48213} />
+            </p>
+          </PaperSheet>
+        </div>
       </Section>
 
       <Section title="Redaction – kitakarás">

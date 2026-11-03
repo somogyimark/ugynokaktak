@@ -5,6 +5,7 @@ import '@fontsource/courier-prime/700.css';
 import '@fontsource/special-elite/400.css';
 import '@fontsource/oswald/500.css';
 import '@fontsource/oswald/700.css';
+import '@fontsource/stardos-stencil/latin-700.css';
 import '@fontsource/ibm-plex-mono/400.css';
 import '@fontsource/ibm-plex-mono/600.css';
 import './index.css';

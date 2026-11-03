@@ -55,7 +55,7 @@ export function BNaploSheet({ record }: { record: AgentRecord }) {
                 aria-current={selected ? 'true' : undefined}
                 aria-hidden={selected ? undefined : true}
                 className={`relative flex items-start gap-3 py-2 pr-4 sm:pr-6 ${
-                  selected ? 'z-[1] bg-[linear-gradient(transparent_6%,rgba(255,226,92,0.55)_6%,rgba(255,226,92,0.55)_94%,transparent_94%)]' : 'opacity-70'
+                  selected ? 'highlight-sweep z-[1]' : 'opacity-70'
                 }`}
               >
                 <span className="w-12 shrink-0 pt-1 pr-2 text-right font-terminal text-sm text-stamp-dark tabular-nums">{n}.</span>
@@ -63,7 +63,7 @@ export function BNaploSheet({ record }: { record: AgentRecord }) {
                   {selected ? (
                     <>
                       <span className="sr-only">{n}. sor: </span>
-                      <TypewriterText text={record.name} jitter as="p" className="ink-typed text-2xl leading-9" />
+                      <TypewriterText text={record.name} jitter animate delay={700} speed={45} as="p" className="ink-typed text-2xl leading-9" />
                       <dl className="mt-1 grid gap-x-6 gap-y-1 pb-1 sm:grid-cols-2">
                         {DETAILS.map((field) => {
                           const text = fieldText(record, field, formatDate);
