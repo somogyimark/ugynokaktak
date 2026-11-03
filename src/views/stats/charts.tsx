@@ -51,7 +51,7 @@ export function BarList({ items, label }: { items: { key: string; label: ReactNo
         <li key={item.key} className="grid grid-cols-[8.5rem_1fr_auto] items-center gap-3 text-sm sm:grid-cols-[10rem_1fr_auto]">
           <span className="truncate">{item.label}</span>
           <span className="h-4 rounded-r bg-ink/10" aria-hidden="true">
-            <span className="block h-full rounded-r bg-ink" style={{ width: `${(item.value / max) * 100}%` }} />
+            <span className="grow-x block h-full rounded-r bg-ink" style={{ width: `${(item.value / max) * 100}%` }} />
           </span>
           <span className="w-16 text-right font-terminal tabular-nums">{formatNumber(item.value)}</span>
         </li>
@@ -83,7 +83,7 @@ export function YearMultiples({ series, from, to }: { series: YearSeries[]; from
         const total = years.reduce((a, y) => a + (s.counts[y] ?? 0), 0);
         const peak = years.reduce((best, y) => ((s.counts[y] ?? 0) > (s.counts[best] ?? 0) ? y : best), from);
         return (
-          <figure key={s.key}>
+          <figure key={s.key} data-year-chart>
             <figcaption className="mb-1 flex items-baseline justify-between text-sm">
               <span className="font-stamp tracking-[0.15em] uppercase">{s.label}</span>
               <span className="font-terminal text-xs text-ink-soft">
@@ -113,6 +113,7 @@ export function YearMultiples({ series, from, to }: { series: YearSeries[]; from
                         width={barW}
                         height={h}
                         rx={Math.min(2, barW / 2)}
+                        data-year-bar
                         className="pointer-events-none fill-ink transition-colors group-hover:fill-stamp"
                       />
                     )}
@@ -164,7 +165,7 @@ export function CountyTileMap({ counts }: { counts: Record<string, number> }) {
           const y = c.row * T + G / 2;
           const size = T - G;
           return (
-            <g key={c.code}>
+            <g key={c.code} data-tile>
               <title>{`${c.name}: ${formatNumber(v)}`}</title>
               <rect
                 x={x}

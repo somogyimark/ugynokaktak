@@ -31,7 +31,36 @@ Node 20+ szükséges (22-vel tesztelve).
 - React Router (az oldalak és a keresési állapot az URL-ben)
 - Saját hosztolású betűk (`@fontsource`): Special Elite, Courier Prime, Oswald, IBM Plex Mono – nincs
   külső betűkérés, így harmadik fél sem látja a látogatókat
+- GSAP + ScrollTrigger a görgetéshez kötött mozgásokhoz – külön, lusta chunkban töltődik, és
+  `prefers-reduced-motion` esetén be sem töltődik
 - Vitest a tesztekhez
+
+### Interakciók és mozgás
+
+- **Olvasóterem-hangulat:** faerezetes asztallap, filmszemcse, és egy asztali lámpa, ami látogatásonként
+  egyszer pislákolva felkapcsol. Egérrel a lámpa követi a kurzort: a fénykörön kívül a szoba
+  elsötétül (legfeljebb annyira, hogy a szöveg kontrasztja WCAG AA marad), a fénycsóvában por száll, a
+  papír a lámpa alatt felmelegszik. Érintőképernyőn és `prefers-contrast: more` esetén csak a statikus
+  fény marad.
+- **Asztali kellékek** (széles képernyőn): töltőtoll, ceruza, pecsételő és párna, gemkapcsok, kávéfolt,
+  cetli – az egérrel enyhe parallaxisban mozognak. A dosszié borítója kopott sarkú, zsinóros zárógombbal.
+- **Nyitóoldal:** a dosszié kicsit követi az egeret, a „Szigorúan titkos” pecsét rácsap, kinyitáskor a
+  lapok sorban kicsúsznak; az „Az irattár” szakasz széles képernyőn kitűzve marad, és görgetésre egymásra
+  kerül a három irattípus mintalapja (ezek csak kitakart sávokat tartalmaznak, adatot nem). A keresőmező
+  fiktív példaneveket gépel, a számlálók mechanikus dobként pörögnek be.
+- **Rekordok:** a kartont az írógép mezőnként tölti ki, majd „Iktatva” pecsét kerül rá, és a lap egérre
+  megbillen; a naplóban szövegkiemelő húz végig a soron; a terminál CRT-ként kapcsol be, a szalagorsók
+  olvasás közben forognak.
+- **Katalógus és kimutatás:** a cédulák sorban kihúzódnak a fiókból; a diagramok görgetésre rajzolódnak ki.
+- **Oldalváltás:** View Transitions API (ahol támogatott), a fejléc és a DEMÓ-szalag helyben marad.
+- **Hang és zene:** a fejléc „Hang” kapcsolójával írógép-, terminál- és pecséthangok, a „Zene”
+  kapcsolóval korhű aláfestés: lassú analóg szintipad A-mollban, mély drón, zenélődoboz-motívum
+  szalagvisszhanggal, szalagsercegés, és időnként egy távoli rövidhullámú „számállomás” morzejelei. Minden
+  élőben, WebAudióval szól, hangfájl nincs. Alapból mindkettő ki van kapcsolva; a választás csak a
+  böngészőben tárolódik, és a bekapcsolt zene a böngésző szabályai miatt az első kattintásra indul.
+- **Billentyűzet:** a `/` bárhonnan a keresőmezőre ugrik.
+
+Csökkentett mozgás kérésekor minden azonnal, végállapotban jelenik meg.
 
 ## Oldalak
 

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ElementType } from 'react';
 import { useReducedMotion } from '../hooks/useReducedMotion';
 import { seededRandom } from '../lib/random';
+import { sound } from '../lib/sound';
 
 interface TypewriterTextProps {
   text: string;
@@ -47,10 +48,13 @@ export function TypewriterText({
     setShown(0);
     let raf = 0;
     let start = 0;
+    let last = 0;
     const tick = (now: number) => {
       if (!start) start = now;
       const elapsed = now - start - delay;
       const count = elapsed <= 0 ? 0 : Math.min(text.length, Math.floor(elapsed / speed) + 1);
+      if (count > last && text[count - 1] !== ' ') sound.click();
+      last = count;
       setShown(count);
       if (count < text.length) raf = requestAnimationFrame(tick);
       else onDone?.();

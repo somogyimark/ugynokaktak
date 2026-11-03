@@ -20,7 +20,7 @@ export interface ResultListHandle {
 const ESTIMATED_ROW = 104;
 
 /** Library index card (cédula) for one catalog row. */
-function CatalogCard({ row, backSearch, active, onFocus }: { row: CatalogRow; backSearch: string; active: boolean; onFocus: () => void }) {
+function CatalogCard({ row, backSearch, active, onFocus, index }: { row: CatalogRow; backSearch: string; active: boolean; onFocus: () => void; index: number }) {
   const [id, source, name, coverName, birthYear, birthPlace, , recruitYear, registry] = row;
   const details = [
     birthYear || birthPlace ? `szül. ${[birthYear, birthPlace].filter(Boolean).join(', ')}` : null,
@@ -30,10 +30,13 @@ function CatalogCard({ row, backSearch, active, onFocus }: { row: CatalogRow; ba
     <Link
       to={`/akta/${id}`}
       state={{ backSearch }}
+      viewTransition
       tabIndex={active ? 0 : -1}
       onFocus={onFocus}
-      className="group relative block rounded-[2px] border border-paper-edge bg-paper-light px-4 pt-3 pb-5 text-ink shadow-[0_1px_0_rgba(0,0,0,0.08),0_3px_8px_-4px_rgba(40,25,5,0.35)] transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5"
+      className="card-in group relative block rounded-[2px] border border-paper-edge bg-paper-light px-4 pt-3 pb-5 text-ink shadow-[0_1px_0_rgba(0,0,0,0.08),0_3px_8px_-4px_rgba(40,25,5,0.35)] transition-[translate,rotate,box-shadow] hover:-translate-y-1 hover:rotate-[-0.35deg] hover:shadow-[0_2px_0_rgba(0,0,0,0.08),0_10px_18px_-8px_rgba(40,25,5,0.45)] focus-visible:-translate-y-1"
       style={{
+        // Cards pulled out of the drawer one after another; later (scrolled-in) cards appear at once.
+        animationDelay: `${Math.min(index, 10) * 35}ms`,
         backgroundImage:
           'linear-gradient(180deg, transparent 2.15rem, rgb(179 38 30 / 0.45) 2.15rem, rgb(179 38 30 / 0.45) calc(2.15rem + 1px), transparent calc(2.15rem + 1px))',
       }}
@@ -154,7 +157,7 @@ export function ResultList({ rows, indices, onExitTop, backSearch, ref }: Result
               className="absolute top-0 left-0 w-full"
               style={{ transform: `translateY(${item.start - virtualizer.options.scrollMargin}px)` }}
             >
-              <CatalogCard row={row} backSearch={backSearch} active={item.index === active} onFocus={() => setActive(item.index)} />
+              <CatalogCard row={row} index={item.index} backSearch={backSearch} active={item.index === active} onFocus={() => setActive(item.index)} />
             </li>
           );
         })}

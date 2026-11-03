@@ -4,6 +4,7 @@ import { PaperClip } from '../../components/PaperClip';
 import { Redaction } from '../../components/Redaction';
 import { RegistryNumber } from '../../components/RegistryNumber';
 import { Stamp } from '../../components/Stamp';
+import { Tilt } from '../../components/Tilt';
 import { TypewriterText } from '../../components/TypewriterText';
 import { formatDate } from '../../lib/format';
 import { seededRandom } from '../../lib/random';
@@ -23,8 +24,11 @@ const LAYOUT: CardField[] = [
   { field: 'activity', wide: true },
 ];
 
+const TYPE_SPEED = 24;
+const FIELD_PAUSE = 160;
+
 /** One pre-printed box on the card: faded label, typed value slightly off the line. */
-function CardBox({ record, field, wide, rnd }: CardField & { record: AgentRecord; rnd: () => number }) {
+function CardBox({ record, field, wide, rnd, delay }: CardField & { record: AgentRecord; rnd: () => number; delay: number }) {
   const text = fieldText(record, field, formatDate);
   const dx = (rnd() - 0.3) * 0.6;
   const dy = (rnd() - 0.5) * 0.25;
@@ -35,7 +39,7 @@ function CardBox({ record, field, wide, rnd }: CardField & { record: AgentRecord
       <dd className="mt-0.5 min-h-7">
         {text ? (
           <span className="inline-block" style={{ transform: `translate(${dx}em, ${dy}em) rotate(${rot}deg)` }}>
-            <TypewriterText text={text} jitter className={`ink-typed ${field === 'name' ? 'text-2xl' : 'text-lg'} [filter:url(#ink-bleed)]`} />
+            <TypewriterText text={text} jitter animate delay={delay} speed={TYPE_SPEED} className={`ink-typed ${field === 'name' ? 'text-2xl' : 'text-lg'} [filter:url(#ink-bleed)]`} />
           </span>
         ) : (
           <Redaction seed={`${record.id}-${field}`} />
@@ -50,51 +54,60 @@ export function Karton6Sheet({ record }: { record: AgentRecord }) {
   const rnd = seededRandom(record.id);
   const blotX = 20 + rnd() * 60;
   const blotY = 15 + rnd() * 60;
+  // The typist fills the boxes one after another: each field starts when the previous one is done.
+  let typed = 400;
+  const delays = LAYOUT.map(({ field }) => {
+    const start = typed;
+    typed += (fieldText(record, field, formatDate)?.length ?? 0) * TYPE_SPEED + FIELD_PAUSE;
+    return start;
+  });
   return (
     <div className="relative mx-auto max-w-3xl pt-8">
       <PaperClip className="absolute -top-10 left-24 z-10 h-20 w-8 sm:left-32" rotate={-4} />
-      <PaperSheet variant="card" tilt={-0.6} className="overflow-hidden">
-        {/* Ink blots: decorative only. */}
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute h-10 w-14 rounded-[45%] bg-[radial-gradient(circle,rgba(27,26,42,0.28),rgba(27,26,42,0.08)_55%,transparent_70%)]"
-          style={{ left: `${blotX}%`, top: `${blotY}%`, rotate: `${rnd() * 90}deg` }}
-        />
-        <header className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-ink/60 px-4 pt-4 pb-3 sm:px-6">
-          <div className="flex items-baseline gap-3">
-            <span className="font-stamp text-5xl leading-none font-bold text-ink/80" aria-hidden="true">
-              6
-            </span>
-            <div>
-              <p className="font-stamp text-lg font-bold tracking-[0.2em] uppercase">Nyilvántartó karton</p>
-              <p className="font-stamp text-[0.68rem] tracking-[0.2em] text-ink-faded uppercase">Hálózati személy · 6-os karton</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            <Stamp size="sm" rotate={4}>
-              Szigorúan titkos
-            </Stamp>
-            {record.registryNumber ? (
-              <RegistryNumber value={record.registryNumber} label="Nyt. sz." />
-            ) : (
-              <span className="text-sm">
-                Nyt. sz.: <Redaction seed={`${record.id}-reg`} chars={10} />
+      <Tilt max={4}>
+        <PaperSheet variant="card" tilt={-0.6} className="overflow-hidden">
+          {/* Ink blots: decorative only. */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute h-10 w-14 rounded-[45%] bg-[radial-gradient(circle,rgba(27,26,42,0.28),rgba(27,26,42,0.08)_55%,transparent_70%)]"
+            style={{ left: `${blotX}%`, top: `${blotY}%`, rotate: `${rnd() * 90}deg` }}
+          />
+          <header className="flex flex-wrap items-start justify-between gap-3 border-b-2 border-ink/60 px-4 pt-4 pb-3 sm:px-6">
+            <div className="flex items-baseline gap-3">
+              <span className="font-stamp text-5xl leading-none font-bold text-ink/80" aria-hidden="true">
+                6
               </span>
-            )}
-          </div>
-        </header>
-        <dl className="grid border-t border-l border-ink/25 sm:grid-cols-2">
-          {LAYOUT.map((f) => (
-            <CardBox key={f.field} record={record} rnd={rnd} {...f} />
-          ))}
-        </dl>
-        <footer className="flex items-end justify-between px-4 py-3 text-[0.68rem] text-ink-faded sm:px-6">
-          <span className="font-stamp tracking-[0.2em] uppercase">BM · Nyomtatvány 6.</span>
-          <Stamp color="blue" size="sm" rotate={-8} className="opacity-70">
-            Iktatva
-          </Stamp>
-        </footer>
-      </PaperSheet>
+              <div>
+                <p className="font-stamp text-lg font-bold tracking-[0.2em] uppercase">Nyilvántartó karton</p>
+                <p className="font-stamp text-[0.68rem] tracking-[0.2em] text-ink-faded uppercase">Hálózati személy · 6-os karton</p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-2">
+              <Stamp size="sm" rotate={4} slam={200}>
+                Szigorúan titkos
+              </Stamp>
+              {record.registryNumber ? (
+                <RegistryNumber value={record.registryNumber} label="Nyt. sz." />
+              ) : (
+                <span className="text-sm">
+                  Nyt. sz.: <Redaction seed={`${record.id}-reg`} chars={10} />
+                </span>
+              )}
+            </div>
+          </header>
+          <dl className="grid border-t border-l border-ink/25 sm:grid-cols-2">
+            {LAYOUT.map((f, i) => (
+              <CardBox key={f.field} record={record} rnd={rnd} delay={delays[i]!} {...f} />
+            ))}
+          </dl>
+          <footer className="flex items-end justify-between px-4 py-3 text-[0.68rem] text-ink-faded sm:px-6">
+            <span className="font-stamp tracking-[0.2em] uppercase">BM · Nyomtatvány 6.</span>
+            <Stamp color="blue" size="sm" rotate={-8} slam={typed} className="opacity-70">
+              Iktatva
+            </Stamp>
+          </footer>
+        </PaperSheet>
+      </Tilt>
     </div>
   );
 }

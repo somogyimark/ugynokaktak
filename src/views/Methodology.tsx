@@ -38,7 +38,7 @@ export default function Methodology() {
             <p className="font-stamp text-xs tracking-[0.25em] text-ink-soft uppercase">Tájékoztató</p>
             <h1 className="font-stamp text-3xl font-bold tracking-[0.12em] uppercase">Módszertan és jogi tudnivalók</h1>
           </div>
-          <Stamp color="blue" rotate={5}>
+          <Stamp color="blue" rotate={5} slam={300}>
             Olvasandó
           </Stamp>
         </header>

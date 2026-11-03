@@ -8,7 +8,7 @@ export default function NotFound() {
     <section className="mx-auto max-w-xl px-4 py-16">
       <PageMeta title="Nem található" />
       <PaperSheet variant="aged" tilt={-1} className="p-8 text-center">
-        <Stamp size="lg" rotate={-8}>
+        <Stamp size="lg" rotate={-8} slam={250}>
           Nem található
         </Stamp>
         <h1 className="mt-6 font-stamp text-2xl tracking-widest uppercase">404 – Az akta hiányzik</h1>

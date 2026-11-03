@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { PageMeta } from '../components/PageMeta';
 import { PaperSheet } from '../components/PaperSheet';
 import { Stamp } from '../components/Stamp';
@@ -9,6 +9,7 @@ import { COUNTIES, COUNTY_BY_CODE } from '../data/geo';
 import type { Stats as StatsData } from '../data/schema';
 import { SOURCE_TYPES, SOURCES } from '../data/sources';
 import { useAsync } from '../hooks/useAsync';
+import { belowFold, useGsap } from '../hooks/useGsap';
 import { formatDate, formatNumber } from '../lib/format';
 import { FIELD_LABELS } from './record/fields';
 import { BarList, CountyTileMap, TableView, YearMultiples } from './stats/charts';
@@ -49,7 +50,9 @@ function Report({ stats }: { stats: StatsData }) {
         </div>
         <div className="flex flex-col items-end gap-3">
           <span className="font-stamp text-sm tracking-[0.15em] text-ink-soft uppercase line-through decoration-2">Szigorúan titkos</span>
-          <Stamp rotate={-6}>Nyilvános</Stamp>
+          <Stamp rotate={-6} slam={350}>
+            Nyilvános
+          </Stamp>
           <RegistryNumber value={`KIM-${stats.generatedAt.slice(0, 4)}/${String(stats.totalRecords).padStart(5, '0')}`} />
         </div>
       </header>
@@ -159,8 +162,39 @@ function Report({ stats }: { stats: StatsData }) {
 
 export default function Stats() {
   const stats = useAsync(loadStats, []);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Charts below the fold draw themselves as they scroll into view.
+  useGsap(
+    ref,
+    (gsap) => {
+      for (const fig of belowFold(gsap.utils.toArray<Element>('[data-year-chart]'))) {
+        gsap.from(fig.querySelectorAll('[data-year-bar]'), {
+          scaleY: 0,
+          transformOrigin: '50% 100%',
+          duration: 0.6,
+          ease: 'power2.out',
+          stagger: { amount: 0.7 },
+          scrollTrigger: { trigger: fig, start: 'top 85%', once: true },
+        });
+      }
+      const tiles = belowFold(gsap.utils.toArray<Element>('[data-tile]'));
+      if (!tiles.length) return;
+      gsap.from(tiles, {
+        scale: 0.4,
+        opacity: 0,
+        transformOrigin: '50% 50%',
+        duration: 0.5,
+        ease: 'back.out(1.6)',
+        stagger: { amount: 0.6, from: 'random' },
+        scrollTrigger: { trigger: tiles[0], start: 'top 85%', once: true },
+      });
+    },
+    [stats.status],
+  );
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10">
+    <div ref={ref} className="mx-auto max-w-4xl px-4 py-10">
       <PageMeta
         title="Kimutatás"
         indexable
