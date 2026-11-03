@@ -16,7 +16,7 @@ function AudioToggle({ store, label, title, icon }: { store: Store; label: strin
       aria-pressed={on}
       onClick={() => store.set(!on)}
       title={on ? title[0] : title[1]}
-      className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-stamp text-sm tracking-[0.12em] uppercase hover:bg-[var(--desk-line)] aria-pressed:text-stamp dark:aria-pressed:text-[#ff8a7a]"
+      className="inline-flex items-center gap-1.5 rounded-sm px-2.5 py-1.5 font-stamp text-sm tracking-[0.12em] uppercase hover:bg-[var(--desk-line)] aria-pressed:text-[#ff8a7a]"
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
         {icon(on)}

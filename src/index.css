@@ -20,7 +20,6 @@
   --color-phosphor: #33ff66;
   --color-phosphor-dim: #1fae45;
   --color-terminal: #050805;
-  --color-desk: #d9d2c3;
   --color-desk-dark: #17140f;
 
   --font-typewriter: 'Special Elite', 'Courier Prime', 'Courier New', Courier, ui-monospace, monospace;
@@ -208,21 +207,14 @@
 /* Base                                                                 */
 /* ------------------------------------------------------------------ */
 @layer base {
+  /* The desk is always the dark reading room, whatever the system theme; the papers on it stay
+     light. */
   :root {
-    color-scheme: light dark;
-    --desk: var(--color-desk);
-    --desk-text: var(--color-ink);
-    --desk-muted: var(--color-ink-faded);
-    --desk-line: rgb(29 27 25 / 0.18);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --desk: var(--color-desk-dark);
-      --desk-text: #ece3cf;
-      --desk-muted: #b9ad96;
-      --desk-line: rgb(236 227 207 / 0.18);
-    }
+    color-scheme: dark;
+    --desk: var(--color-desk-dark);
+    --desk-text: #ece3cf;
+    --desk-muted: #b9ad96;
+    --desk-line: rgb(236 227 207 / 0.18);
   }
 
   html {
@@ -243,15 +235,10 @@
     overflow-x: clip;
   }
 
+  /* Mid blue: at least 3:1 against both the dark desk and the light paper. */
   :focus-visible {
-    outline: 3px solid var(--color-pen);
+    outline: 3px solid #4d7cff;
     outline-offset: 2px;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :focus-visible {
-      outline-color: #8fb0ff;
-    }
   }
 
   /* Route changes (View Transitions API, progressive enhancement): the page is a sheet slid
@@ -458,8 +445,12 @@
       radial-gradient(16rem circle at var(--lx, 50%) var(--ly, 16%), rgb(255 226 170 / calc(var(--lamp) * 1.5)), transparent 70%),
       radial-gradient(50rem circle at var(--lx, 50%) var(--ly, 16%), rgb(255 186 100 / var(--lamp)), transparent 66%),
       radial-gradient(ellipse at 50% 35%, transparent 40%, rgb(0 0 0 / var(--vignette)));
-    --lamp: 0.3;
-    --vignette: 0.22;
+    --lamp: 0.2;
+    --vignette: 0.7;
+  }
+
+  .desk-lamp-live {
+    --lamp: 0.26;
   }
 
   /* Above the content: the room outside the beam falls into shadow. Capped darkness keeps text
@@ -470,8 +461,7 @@
     inset: 0;
     z-index: 30;
     mix-blend-mode: multiply;
-    background: radial-gradient(34rem circle at var(--lx, 50%) var(--ly, 30%), transparent 30%, rgb(20 12 4 / var(--shade)) 100%);
-    --shade: 0.22;
+    background: radial-gradient(34rem circle at var(--lx, 50%) var(--ly, 30%), transparent 30%, rgb(20 12 4 / 0.4) 100%);
   }
 
   /* ...and the paper right under the lamp warms up. */
@@ -491,19 +481,6 @@
     z-index: 31;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .desk-lamp {
-      --lamp: 0.2;
-      --vignette: 0.7;
-    }
-    .desk-lamp-live {
-      --lamp: 0.26;
-    }
-    .lamp-shade {
-      --shade: 0.4;
-    }
-  }
-
   /* Pull-chain lamp switching on, once per visit. */
   .lamp-intro {
     animation: lamp-on 1.3s steps(1) both;
@@ -516,15 +493,9 @@
     position: fixed;
     inset: 0;
     z-index: 45;
-    opacity: 0.05;
+    opacity: 0.07;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.4 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
     animation: grain 0.9s steps(1) infinite;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .film-grain {
-      opacity: 0.07;
-    }
   }
 
   .stamp-slam {
