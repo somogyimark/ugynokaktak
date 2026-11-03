@@ -135,6 +135,33 @@ Mért értékek 60 000 fiktív rekorddal (`npm run data:mock -- --count 60000`):
 
 A teljesítményteszt a `src/search/engine.test.ts`-ben fut minden `npm test`-nél.
 
+## Rekordnézetek
+
+A `/akta/:id` oldal a rekord `source` mezője alapján választ sablont (`src/views/record/RecordDocument.tsx`,
+`TEMPLATES`):
+
+- **6-os karton** – sárgult kartonlap előnyomott mezőcímkékkel, írógépes kitöltéssel, enyhe
+  elcsúszással és tintafolttal.
+- **B-napló** – vonalazott főkönyvi lap sorszámozott sorokkal; a kiválasztott sor kiemelve. A szomszédos
+  sorok elmosottak, és **nem valódi adatok**: más bejegyzések neve a lapon sosem jelenik meg.
+- **H-adattár** – foszforzöld terminál, a mezők karakterenként „töltődnek be” (átugorható;
+  `prefers-reduced-motion` esetén azonnal). Képernyőolvasó a teljes, statikus listát kapja.
+
+Minden rekordnézeten: kötelező figyelmeztetés (SPEC 9. pont), forrás megnevezése, link a hivatalos
+rekordra (ha van), az eredeti forrásmezők, és ha ugyanez a név más irattípusban is szerepel, a
+„Azonos nevű bejegyzés más forrásban is” jelzés – automatikus összevonás nélkül. A hiányzó mezők fekete
+kitakarásként jelennek meg „ADAT NEM ÁLL RENDELKEZÉSRE” súgóval.
+
+A `src/views/record/RecordDocument.test.tsx` mindhárom típust **mind az 1024 mezőkombinációval**
+(az üreset is beleértve) lerendereli, és ellenőrzi a kitöltött értékeket, a kitakarásokat és a
+figyelmeztetést.
+
+**Indexelés:** a `PageMeta` komponens alapból `noindex, nofollow`; csak a nyitóoldal, a Kimutatás és a
+Módszertan kapcsolja ki (`indexable`). Ezt teszt is ellenőrzi.
+
+> A helyesbítési kapcsolat címe (`VITE_CONTACT_EMAIL`) jelenleg helyőrző (`helyesbites@example.org`);
+> élesítés előtt valódi, figyelt címre kell cserélni.
+
 ## Design system
 
 A `/styleguide` oldal mutatja be a komponenseket: `Folder`, `PaperSheet`, `Stamp`, `Redaction`,
@@ -152,7 +179,7 @@ keresőoldalak `noindex`-esek, nincs analitika, nincs személyenkénti megosztó
 - [x] M1 – Váz és design system
 - [x] M2 – Séma + tesztadat
 - [x] M3 – Keresés
-- [ ] M4 – Rekordnézetek
+- [x] M4 – Rekordnézetek
 - [ ] M5 – Nyitóoldal, statisztika, módszertan
 - [ ] M6 – Éles adat bekötése (csak jóváhagyás után!)
 - [ ] M7 – Deploy

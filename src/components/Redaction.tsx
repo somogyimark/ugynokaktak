@@ -7,6 +7,8 @@ interface RedactionProps {
   reason?: string;
   /** Seed for a stable pseudo-random width. */
   seed?: string;
+  /** "paper" = black marker bar; "terminal" = dim phosphor block for the tape read-out. */
+  tone?: 'paper' | 'terminal';
   className?: string;
 }
 
@@ -16,11 +18,15 @@ export const MISSING_LABEL = 'ADAT NEM ÁLL RENDELKEZÉSRE';
  * Black redaction bar. It never wraps real content, so there is nothing to reveal on hover;
  * hovering only shows why the field is blank.
  */
-export function Redaction({ chars, reason = MISSING_LABEL, seed = 'x', className = '' }: RedactionProps) {
+export function Redaction({ chars, reason = MISSING_LABEL, seed = 'x', tone = 'paper', className = '' }: RedactionProps) {
   const width = chars ?? 6 + Math.floor(seededRandom(seed)() * 10);
   return (
     <span className={`tooltip-host ${className}`} data-redaction="">
-      <span className="redaction" style={{ width: `${width}ch` }} aria-hidden="true" />
+      <span
+        className={tone === 'terminal' ? 'redaction !bg-phosphor-dim/35 !shadow-none' : 'redaction'}
+        style={{ width: `${width}ch` }}
+        aria-hidden="true"
+      />
       <span className="sr-only">{reason}</span>
       <span className="tooltip" aria-hidden="true">
         {reason}
