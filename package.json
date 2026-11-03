@@ -9,7 +9,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "predev": "tsx scripts/generate-mock.ts --if-missing",
+    "prebuild": "tsx scripts/generate-mock.ts --if-missing",
+    "data:mock": "tsx scripts/generate-mock.ts",
+    "data:validate": "tsx scripts/validate-data.ts",
+    "data:import": "tsx scripts/import.ts"
   },
   "dependencies": {
     "@fontsource/courier-prime": "^5.3.0",

@@ -1,5 +1,6 @@
 import { NavLink, Outlet, Link } from 'react-router';
 import { SvgDefs } from './SvgDefs';
+import { DemoBanner } from './DemoBanner';
 
 const NAV = [
   { to: '/', label: 'Az akta', end: true },
@@ -18,6 +19,7 @@ export function Layout() {
       >
         Ugrás a tartalomra
       </a>
+      <DemoBanner />
       <header className="border-b border-[var(--desk-line)]">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 py-3">
           <Link to="/" className="group flex items-baseline gap-2 no-underline">

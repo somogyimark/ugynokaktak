@@ -58,6 +58,57 @@ src/
 public/data/      generált, darabolt JSON (gitignore, a scriptek állítják elő)
 ```
 
+## Adatok
+
+### Normalizált modell
+
+A `src/data/schema.ts` tartalmazza a zod sémákat és a TypeScript típusokat (`AgentRecord`,
+`Manifest`, `Stats`, `CatalogRow`). Az `id`, `source`, `name`, `nameNormalized` kötelező, minden más
+mező opcionális; az ismeretlen mezők a `raw` objektumba kerülnek, így semmi nem vész el. A zod csak az
+importnál/validálásnál fut, a kliensbe nem kerül be.
+
+### Fájlok a `public/data` mappában
+
+| Fájl                  | Tartalom                                                                 |
+| --------------------- | ------------------------------------------------------------------------ |
+| `manifest.json`       | mód (`mock`/`live`), dátum, rekordszámok, csomagok száma                 |
+| `stats.json`          | csak aggregált számok (típusonként, évenként, megyénként, kitöltöttség) |
+| `records-NNN.json`    | teljes rekordok, `hash(id) % bucketCount` szerint ~400-as csomagokban     |
+| `catalog-NNN.json`    | tömör keresőkatalógus (tuple-ök) a keresőworkernek                       |
+
+A rekordoldal csak azt az egy csomagot tölti le, amelyikben a rekord van; az adatbázis egyben nem
+tölthető le.
+
+### Tesztadat
+
+```bash
+npm run data:mock                    # 6000 fiktív rekord (a predev/prebuild magától is legenerálja, ha hiányzik)
+npm run data:mock -- --count 60000   # terheléses próbához
+npm run data:validate                # zod-validálás, 0 hibának kell lennie
+```
+
+A vezetéknevek mind egyértelműen kitalált tövekből állnak (Próba-, Teszt-, Minta-, Demó-, Fiktív-,
+Kitalált-, Példa-), hogy semmilyen valós személlyel ne lehessen összetéveszteni őket. A H-adattár
+rekordjainak egy része ékezet nélküli nagybetűs (mágnesszalag-stílus), és néhány név ékezet nélkül
+szerepel – így a keresés ékezetfüggetlensége valós helyzetben tesztelhető.
+
+### Adatmód és DEMÓ szalag
+
+A `VITE_DATA_MODE` (`.env`) értéke `mock` vagy `live`. A „FIKTÍV TESZTADAT – DEMÓ” szalag akkor
+látszik, ha a mód `mock`, **vagy** ha a betöltött adat manifestje szerint tesztadatról van szó – így egy
+elrontott konfiguráció sem tüntetheti el.
+
+### Adapterek és import (M6-hoz előkészítve)
+
+`src/adapters/` – általános CSV és JSON/NDJSON adapter oszlopleképezéssel (`FieldMapping`). A valódi
+oszlopneveket az M6 során, a tényleges fájlok ismeretében kell beírni a `scripts/import.config.ts`-be,
+utána:
+
+```bash
+npm run data:import -- --dry-run   # csak riport (raw/import-report.md)
+npm run data:import                # public/data felülírása
+```
+
 ## Design system
 
 A `/styleguide` oldal mutatja be a komponenseket: `Folder`, `PaperSheet`, `Stamp`, `Redaction`,
@@ -73,7 +124,7 @@ keresőoldalak `noindex`-esek, nincs analitika, nincs személyenkénti megosztó
 ## Mérföldkövek
 
 - [x] M1 – Váz és design system
-- [ ] M2 – Séma + tesztadat
+- [x] M2 – Séma + tesztadat
 - [ ] M3 – Keresés
 - [ ] M4 – Rekordnézetek
 - [ ] M5 – Nyitóoldal, statisztika, módszertan
