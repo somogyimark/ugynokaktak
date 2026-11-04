@@ -65,7 +65,7 @@ export function Layout() {
                     viewTransition
                     className={({ isActive }) =>
                       `inline-block rounded-sm px-2.5 py-1.5 transition-colors ${
-                        isActive ? 'bg-ink text-paper dark:bg-paper dark:text-ink' : 'hover:bg-[var(--desk-line)]'
+                        isActive ? 'bg-paper text-ink' : 'hover:bg-[var(--desk-line)]'
                       }`
                     }
                   >

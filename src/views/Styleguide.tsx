@@ -102,7 +102,7 @@ export default function Styleguide() {
             type="button"
             onClick={() => setOpen((o) => !o)}
             aria-pressed={open}
-            className="mt-4 rounded-sm bg-ink px-4 py-2 font-stamp text-sm tracking-widest text-paper uppercase dark:bg-paper dark:text-ink"
+            className="mt-4 rounded-sm bg-paper px-4 py-2 font-stamp text-sm tracking-widest text-ink uppercase"
           >
             {open ? 'Becsukás' : 'Kinyitás'}
           </button>

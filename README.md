@@ -225,6 +225,9 @@ keresőkatalógust letöltenie.
 - **Megye:** a normalizált modellben nincs megye mező, ezért a megyét a születési helyből vezetjük le
   (`src/data/geo.ts`, mai megyehatárok); ismeretlen helynél nem találgatunk. Élesítéskor a helységnévtárat
   bővíteni kell.
+- **Mindig sötét asztal:** a SPEC 8. pontja szerint a keret/háttér követte volna a rendszer témáját; kérésre
+  az olvasóterem (fa asztal, lámpa) mindig sötét, a papírok világosak maradnak. A fókuszkeret színe
+  (`#4d7cff`) mindkét felületen legalább 3:1 kontrasztú.
 - **Megyetérkép:** sematikus csempetérkép (hozzávetőleges elhelyezkedés), nem pontos határvonalas térkép.
 - **B-napló szomszédos sorai:** elmosott helykitöltők, nem valódi bejegyzések – más személyek adatai
   így semmilyen formában (DOM, vágólap, képernyőolvasó) nem szivárognak ki.
